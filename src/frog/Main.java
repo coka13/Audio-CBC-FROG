@@ -20,9 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -50,6 +48,8 @@ public class Main {
 	static String pathSign = "Sign.txt";
 	static String pathPublicKey = "PublicKey.txt";
 	static String pathPrivateKey = "PrivateKey.txt";
+	static String pathSchnorrPubKey = "SchnorrPublicKey.txt";
+	static String pathSchnorrPvtKey = "SchnorrPrivateKey.txt";
 	static String pathFile = "peeper5sec.wav";
 	static String otp;
 	static AudioFormat format;
@@ -57,7 +57,7 @@ public class Main {
 	static String Captcha;
 
 	public static void main(String[] args)
-			throws InvalidKeyException, UnsupportedAudioFileException, IOException, NoSuchAlgorithmException {
+			throws InvalidKeyException, UnsupportedAudioFileException, IOException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
 
 		/* Generate OTP */
 		otp = OTP.genOTP(4);
@@ -85,9 +85,7 @@ public class Main {
 		AudioInputStream ais = AudioSystem.getAudioInputStream(soundFile);
 
 		/* Insert DH key */
-		System.out.println("Enter <bits in q> - generate keys");
-		int numOfbits = sc.nextInt();
-		signature.generate(numOfbits, pathPublicKey, pathPrivateKey); /* Generates user key using DH */
+		ECDH.generate(pathPublicKey, pathPrivateKey); /* Generates user key using ECDH */
 		String k = readFile(pathPrivateKey, StandardCharsets.UTF_8); /* Reading secret key from file */
 		sc.nextLine();
 		System.out.println("Press any key to start...");
@@ -116,9 +114,11 @@ public class Main {
 			System.out.println("3 - View public key");
 			System.out.println("4 - View private key");
 			System.out.println("5 - View signature");
-			System.out.println("6 - Open encrypted file");
-			System.out.println("7 - Open decrypted file");
-			System.out.println("8 - EXIT");
+			System.out.println("6 - View signature public key");
+			System.out.println("7 - View signature private key");
+			System.out.println("8 - Open encrypted file");
+			System.out.println("9 - Open decrypted file");
+			System.out.println("10 - EXIT");
 			type = sc.nextInt();
 
 			switch (type) {
@@ -143,8 +143,8 @@ public class Main {
 				OTP.checkOTP(otp);
 
 				/* Decryption */
-				
-				if (signature.checkSign(pathFile, pathPublicKey, pathSign)) {
+
+				if (Schnorr.checkSign(pathFile, pathSchnorrPubKey, pathSign)) {
 					decryptedSoundFile(decryptedFile, decryptedSoundFile, fileInByte, enc, internalKey);
 					is_decrypted = true;
 					/* Check sound */
@@ -162,13 +162,16 @@ public class Main {
 				break;
 			/* Schnorr signature */
 			case 1:
-				signature.makeSign(pathFile, pathPublicKey, pathPrivateKey, pathSign);
+				System.out.println("Enter <bits in q> - generate keys");
+				int numOfbits = sc.nextInt();
+				Schnorr.generate(numOfbits, pathSchnorrPubKey, pathSchnorrPvtKey); /* Generates user key using DH */
+				Schnorr.makeSign(pathFile, pathSchnorrPubKey, pathSchnorrPvtKey, pathSign);
 				openFile(pathSign);
 				is_signed=true;
 				break;
 			case 2:
 				if(is_signed==true) {
-				signature.checkSign(pathFile, pathPublicKey, pathSign);
+				Schnorr.checkSign(pathFile, pathSchnorrPubKey, pathSign);
 				}
 				else {
 					System.out.println("The file does not contain a signature!");
@@ -196,15 +199,23 @@ public class Main {
 			case 6:
 				openFile("enc.wav");
 				break;
-			/* Open decrypted wav file */
+			/* Open signature public key txt file */
 			case 7:
+				openFile(pathSchnorrPubKey);
+				break;
+			/* Open signature private key txt file */
+			case 8:
+				openFile(pathSchnorrPvtKey);
+				break;
+			/* Open decrypted wav file */
+			case 9:
 				if (is_decrypted == true)
 					openFile("dec.wav");
 				else
 					System.out.println("There is no decrypted file");
 				break;
 			/* Open console output txt file and exit */
-			case 8:
+			case 10:
 				System.out.println("Goodbye!");
 				openFile("output.txt");
 				loop_flag = false;

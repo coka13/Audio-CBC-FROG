@@ -28,7 +28,7 @@ public class Key {
 
     public BigInteger get(int idx){
         if (idx >= Entity.size()) {
-            throw new IllegalArgumentException("idx more then size");
+            throw new IllegalArgumentException("idx more than size");
         }
         return Entity.get(idx);
     }

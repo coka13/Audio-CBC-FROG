@@ -3,19 +3,17 @@ package frog;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.util.Arrays;
+import java.util.Scanner;
 
-public class signature {
 
-	/* Checking if signature is valid */
+public class Schnorr {
+    /* Checking if signature is valid */
     public static boolean checkSign(String path, String pathPublicKey, String pathSign) throws IOException, NoSuchAlgorithmException {
         System.out.println("Checking sign");
         Key PublicKey = new Key(pathPublicKey);
@@ -47,7 +45,7 @@ public class signature {
         }
     }
 
-	/* Generate signature */
+    /* Generate signature */
     public static void makeSign(String path, String pathPublicKey, String pathPrivateKey, String pathSign) throws IOException, NoSuchAlgorithmException {
         Key PublicKey = new Key(pathPublicKey);
         Key PrivateKey = new Key(pathPrivateKey);
@@ -74,7 +72,7 @@ public class signature {
         System.out.println("Success!");
     }
 
-    /* Diffie–Hellman key exchange */
+    /* Schnorr  */
     public static void generate(int blq, String pathPublicKey, String pathPrivateKey) throws FileNotFoundException {
         System.out.println("generating:");
 
@@ -118,3 +116,5 @@ public class signature {
         System.out.println("w = "+ w);
     }
 }
+
+
