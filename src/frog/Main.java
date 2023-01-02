@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import javax.crypto.KeyAgreement;
 import javax.crypto.spec.IvParameterSpec;
 import javax.print.attribute.standard.Media;
 import javax.sound.sampled.AudioFileFormat;
@@ -50,11 +51,16 @@ public class Main {
 	static String pathPrivateKey = "PrivateKey.txt";
 	static String pathSchnorrPubKey = "SchnorrPublicKey.txt";
 	static String pathSchnorrPvtKey = "SchnorrPrivateKey.txt";
+	static String pathSecretKey = "SecretPrivateKey.txt";
 	static String pathFile = "peeper5sec.wav";
 	static String otp;
 	static AudioFormat format;
 	static byte[] original_IV;
 	static String Captcha;
+	static KeyPair kp; // Alice
+	static KeyPair kp2; // Bob
+	static KeyAgreement ka;
+	static PublicKey otherPublicKey;
 
 	public static void main(String[] args)
 			throws InvalidKeyException, UnsupportedAudioFileException, IOException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
@@ -85,11 +91,15 @@ public class Main {
 		AudioInputStream ais = AudioSystem.getAudioInputStream(soundFile);
 
 		/* Insert ECDH key */
-		ECDH.generate(pathPublicKey, pathPrivateKey); /* Generates user key using ECDH */
-		String k = readFile(pathPrivateKey, StandardCharsets.UTF_8); /* Reading secret key from file */
+		kp=ECDH.generate(pathPublicKey, pathPrivateKey); /* Generates user key using ECDH - Alice */
+		kp2=ECDH.generate(pathPublicKey, pathPrivateKey); /* Generates user key using ECDH - Bob */
+		otherPublicKey=kp2.getPublic(); /* Bob public key */
+		ka=ECDH.keyAgreement(kp,otherPublicKey); /* Sign key agreement */
+		ECDH.shareSecret(ka,kp2.getPublic(), kp.getPublic(),pathSecretKey); /* Print secret and save shared key for encryption */
+		String k = readFile(pathSecretKey, StandardCharsets.UTF_8); /* Reading secret key from file */
 		byte[] key = k.getBytes();
 		Object internalKey = frog_Algorithm.makeKey(key);
-		System.out.println("internalkey: "+internalKey.toString());
+		System.out.println("internalkey: "+internalKey.toString()); /* Print FROG internal key */
 		System.out.println("Press any key to start...");
 		sc.nextLine();
 
@@ -119,7 +129,7 @@ public class Main {
 			System.out.println("7 - View signature private key");
 			System.out.println("8 - Open encrypted file");
 			System.out.println("9 - Open decrypted file");
-			System.out.println("10 - View internal key");
+			System.out.println("10 - View secret key");
 			System.out.println("11 - EXIT");
 			type = sc.nextInt();
 
@@ -216,8 +226,12 @@ public class Main {
 				else
 					System.out.println("There is no decrypted file");
 				break;
-			/* Open console output txt file and exit */
+			/* Open secret key txt file */
 			case 10:
+				openFile(pathSchnorrPvtKey);
+				break;
+			/* Open console output txt file and exit */
+			case 11:
 				System.out.println("Goodbye!");
 				openFile("output.txt");
 				loop_flag = false;

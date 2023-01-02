@@ -1,16 +1,12 @@
 package frog;
 
-//Java code to explain how to generate OTP
-
-//Here we are using random() method of util
-//class in Java
 import java.util.*;
 
 public class OTP
 {
  static String genOTP(int len)
  {
-     System.out.print("You OTP is : ");
+     System.out.print("Your OTP is : ");
 
      // Using numeric values
      String numbers = "0123456789";
@@ -29,11 +25,11 @@ public class OTP
      }
      return  String.valueOf(otp);
  }
- 
+    /* Check OTP */
  static void checkOTP(String otp) {
 	 Scanner sc=new Scanner(System.in);
 	 while (true) {
-			System.out.println(("Enter you OTP: "));
+			System.out.println(("Enter your OTP: "));
 			String input_password = sc.next();
 			if (input_password.equals(otp)) {
 				break;
