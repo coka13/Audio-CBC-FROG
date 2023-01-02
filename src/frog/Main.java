@@ -84,14 +84,15 @@ public class Main {
 		File soundFile = new File("peeper5sec.wav");
 		AudioInputStream ais = AudioSystem.getAudioInputStream(soundFile);
 
-		/* Insert DH key */
+		/* Insert ECDH key */
 		ECDH.generate(pathPublicKey, pathPrivateKey); /* Generates user key using ECDH */
 		String k = readFile(pathPrivateKey, StandardCharsets.UTF_8); /* Reading secret key from file */
-		sc.nextLine();
-		System.out.println("Press any key to start...");
-		sc.nextLine();
 		byte[] key = k.getBytes();
 		Object internalKey = frog_Algorithm.makeKey(key);
+		System.out.println("internalkey: "+internalKey.toString());
+		System.out.println("Press any key to start...");
+		sc.nextLine();
+
 
 		/* Reading sound file */
 		byte[][] fileInByte = split(ais.readAllBytes(), frog_Algorithm.BLOCK_SIZE);
@@ -118,7 +119,8 @@ public class Main {
 			System.out.println("7 - View signature private key");
 			System.out.println("8 - Open encrypted file");
 			System.out.println("9 - Open decrypted file");
-			System.out.println("10 - EXIT");
+			System.out.println("10 - View internal key");
+			System.out.println("11 - EXIT");
 			type = sc.nextInt();
 
 			switch (type) {
@@ -195,17 +197,17 @@ public class Main {
 					System.out.println("There is no signature!");
 				}
 				break;
-			/* Open encrypted wav file */
-			case 6:
-				openFile("enc.wav");
-				break;
 			/* Open signature public key txt file */
-			case 7:
+			case 6:
 				openFile(pathSchnorrPubKey);
 				break;
 			/* Open signature private key txt file */
-			case 8:
+			case 7:
 				openFile(pathSchnorrPvtKey);
+				break;
+			/* Open encrypted wav file */
+			case 8:
+				openFile("enc.wav");
 				break;
 			/* Open decrypted wav file */
 			case 9:

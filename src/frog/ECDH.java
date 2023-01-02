@@ -28,15 +28,15 @@ public class ECDH {
         byte[] PubEncoded = publicKey.getEncoded();
         byte[] PvtEncoded = privateKey.getEncoded();
 
+        System.out.println(" public: " + (PubEncoded));
+        System.out.println(" private: " + (PvtEncoded));
 
-        System.out.println(" public: " + new BigInteger(PubEncoded));
-        System.out.println(" private: " + new BigInteger(PvtEncoded));
 
-        write2File(pathPublicKey,new BigInteger(PubEncoded));
-        write2File(pathPrivateKey,new BigInteger(PvtEncoded));
+        write2File(pathPublicKey,(PubEncoded).toString());
+        write2File(pathPrivateKey,(PvtEncoded).toString());
     }
 
-    public static void write2File(String path, BigInteger element) throws FileNotFoundException {
+    public static void write2File(String path, String element) throws FileNotFoundException {
         PrintWriter printWriter = new PrintWriter(new File(path));
         printWriter.println(element);
         printWriter.close();
